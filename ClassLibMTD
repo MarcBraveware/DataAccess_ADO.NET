@@ -1,0 +1,544 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using ClassLibBD;
+using System.Data.Entity;
+using System.Data.Entity.SqlServer;
+
+namespace WebApp_GUIProjetoII
+{
+    public class NWMTD
+    {
+        #region Metodos de Pesquisa para as Categorias
+
+        public string[] Categorias()//METODO FUNCIONAL
+        {
+            NORTHWNDEntities nw = new NORTHWNDEntities();
+            var listaDeCategorias = (from categoria in nw.Categories
+                                     orderby categoria.CategoryName
+                                     select categoria.CategoryName).Distinct();
+
+            return listaDeCategorias.ToArray();
+        }
+
+        public int[] CategoriasID()//METODO FUNCIONAL
+        {
+            NORTHWNDEntities nw = new NORTHWNDEntities();
+            var listaDeCategoriasID = from categoriasID in nw.Categories
+                                      select categoriasID.CategoryID;
+
+            return listaDeCategoriasID.ToArray();
+        }
+
+        public int CategoriasID(string nomeCategoria)//METODO FUNCIONAL
+        {
+            NORTHWNDEntities nw = new NORTHWNDEntities();
+            var listaDeIDCategorias = from categoriaID in nw.Categories
+                                      where categoriaID.CategoryName == nomeCategoria
+                                      select categoriaID.CategoryID;
+            return listaDeIDCategorias.First();
+        }
+
+        public string Categorias(int categoriaID)//METODO FUNCIONAL
+        {
+            NORTHWNDEntities nw = new NORTHWNDEntities();
+            string resultado = "";
+            var listaDeCategorias = from categoria in nw.Categories
+                                    where categoria.CategoryID == categoriaID
+                                    select categoria.CategoryName;
+
+            foreach (var item in listaDeCategorias)
+            {
+                resultado = item;
+            }
+            return resultado;
+        }
+        public int Categorias(string categoriaNome)//METODO FUNCIONAL
+        {
+            NORTHWNDEntities nw = new NORTHWNDEntities();
+            int resultado = 0;
+            var listaDeCategorias = from categoria in nw.Categories
+                                    where categoria.CategoryName == categoriaNome
+                                    select categoria.CategoryID;
+
+            foreach (var item in listaDeCategorias)
+            {
+                resultado = item;
+            }
+            return resultado;
+        }
+        #endregion
+
+        #region Metodos de Pesquisa para os Produtos
+        public string[] Produtos()//METODO FUNCIONAL
+        {
+            NORTHWNDEntities nw = new NORTHWNDEntities();
+            var listaDeProdutos = from produto in nw.Products
+                                  orderby produto.ProductName
+                                  select produto.ProductName;
+
+            return listaDeProdutos.ToArray();
+        }
+        public string Produtos(string nomeProduto)//METODO FUNCIONAL
+        {
+            try
+            {
+                string erro = "O produto que procura não se encontra na BD!";
+                NORTHWNDEntities nw = new NORTHWNDEntities();
+                var listaDeProdutos = from produto in nw.Products
+                                      where produto.ProductName == nomeProduto
+                                      select produto.ProductName;
+                if (nomeProduto.Count() <= 0)
+                {
+                    return "Verifique se preencheu os todos os campos!";
+                }
+                if (listaDeProdutos.Contains(nomeProduto))
+                {
+                    return "A sua procura obteve sucesso!<br />O produto " + listaDeProdutos.FirstOrDefault() + " encontra-se na BD.";
+                }
+                else
+                    return erro;
+            }
+            catch (Exception)
+            {
+                return "Ocorreu um erro no código. Por favor verifique-o.";
+            }
+        }
+
+        public string[] Produto(string categoria)//MÉTODO FUNCIONAL SEM "TRY-CATCH". VER NOTAS DENTRO DO MÉTODO
+        {
+            /////////
+            //NOTA://
+            /////////
+            //Erro associado ao tipo de dados do segundo "return": Não é possível converter char[] em string[], apesar da msgErro ser do tipo string...  
+            /////////
+
+            NORTHWNDEntities nw = new NORTHWNDEntities();
+
+            var listaDeProdutosCategorias = from produto in nw.Products
+                                            where produto.Category.CategoryName == categoria
+                                            select produto.ProductName;
+
+            return listaDeProdutosCategorias.ToArray();
+
+            //string msgErro = "Esta categoria não possui produtos!";
+            //if (listaDeProdutosCategorias.Count() >= 1)
+            //{
+            //    return listaDeProdutosCategorias.ToArray();
+            //}
+            //else
+            //    return msgErro.ToArray();
+        }
+        public int IDProduto(string nomeProduto)//METODO FUNCIONAL SEM "TRY-CATCH"
+        {
+            NORTHWNDEntities nw = new NORTHWNDEntities();
+            var listaDeIDProdutos = from idProduto in nw.Products
+                                    where idProduto.ProductName == nomeProduto
+                                    select idProduto.ProductID;
+
+            return listaDeIDProdutos.First();
+        }
+
+
+        #endregion
+
+        #region Métodos referentes a Clientes
+        public string[] Clientes()//METODO FUNCIONAL E COM "TRY-CATCH" Default
+        {
+            try
+            {
+                NORTHWNDEntities nw = new NORTHWNDEntities();
+                var ListaClientes = from cliente in nw.Customers
+                                    orderby cliente.ContactName
+                                    select cliente.ContactName;
+                return ListaClientes.ToArray();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+        }
+        public string ClientesID(string contactName)//METODO FUNCIONAL E COM "TRY-CATCH"
+        {
+            try
+            {
+                NORTHWNDEntities nw = new NORTHWNDEntities();
+                var ListaClientes = from cliente in nw.Customers
+                                    where cliente.ContactName == contactName
+                                    orderby cliente.CustomerID
+                                    select cliente.CustomerID;
+                if (contactName.Count() <= 0)
+                {
+                    return "Por favor verifique se preencheu todos os dados!";
+                }
+                return ListaClientes.FirstOrDefault();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        public string ClientesCompanyName(string contactName)//METODO FUNCIONAL E COM "TRY-CATCH"
+        {
+            try
+            {
+                NORTHWNDEntities nw = new NORTHWNDEntities();
+                var ListaEmpresas = from cliente in nw.Customers
+                                    where cliente.ContactName == contactName
+                                    select cliente.CompanyName;
+                if (contactName.Count() >= 1)
+                {
+                    return ListaEmpresas.FirstOrDefault();
+                }
+                else
+                {
+                    return "Por favore verifique se preencheu todos os campos!";
+                }
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        #endregion
+
+        #region Métodos referentes a Encomendas
+        public int[] Encomendas(string cliente)//METODO FUNCIONAL E COM "TRY-CATCH" Default 
+        {
+            try
+            {
+                NORTHWNDEntities nw = new NORTHWNDEntities();
+                var ListaEncomendas = from encomenda in nw.Orders
+                                      where encomenda.Customer.ContactName == cliente
+                                      select encomenda.OrderID;
+                return ListaEncomendas.ToArray();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public int[] ListaIDEncomendas()//METODO FUNCIONAL E COM "TRY-CATCH" Default 
+        {
+            try
+            {
+                NORTHWNDEntities nw = new NORTHWNDEntities();
+                var ListaEncomendas = from encomenda in nw.Orders
+                                      orderby encomenda.OrderID
+                                      select encomenda.OrderID;
+
+                return ListaEncomendas.ToArray();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        #endregion
+
+        #region Métodos de Upload de Dados
+        public string AdicionarProduto(string nomeDoProduto) //METODO FUNCIONAL E COM "TRY-CATCH"
+        {
+            try
+            {
+                string msgErro = "O produto já se encontra na BD!";
+                NORTHWNDEntities nw = new NORTHWNDEntities();
+                Product novoProduto = new Product();
+
+                var listaDeProdutos = from produto in nw.Products
+                                      where produto.ProductName == nomeDoProduto
+                                      select produto.ProductName;
+
+                if (listaDeProdutos.Count() <= 0)
+                {
+                    if (nomeDoProduto.Count() <= 0)
+                    {
+                        return "Por favor verifique se preencheu todos os campos!";
+                    }
+                    else
+                    {
+                        novoProduto.ProductName = nomeDoProduto;
+                        nw.Products.Add(novoProduto);
+                        nw.SaveChanges();
+                        return "O produto foi adicionado com o seguinte ID: " + novoProduto.ProductID.ToString() + ".";
+                    }
+                }
+                else
+                {
+                    return msgErro;
+                }
+            }
+            catch (Exception)
+            {
+
+                return "Ocorreu um erro! Por favor verifique o código!";
+            }
+        }
+
+        public string AdicionarCategoria(string nomeDaCategoria)//METODO FUNCIONAL E COM "TRY-CATCH"
+        {
+            string msgErro = "A categoria já se encontra na BD!";
+            NORTHWNDEntities nw = new NORTHWNDEntities();
+            Category novaCategoria = new Category();
+
+
+            var listaNomesCateg = from categoria in nw.Categories
+                                  where categoria.CategoryName == nomeDaCategoria
+                                  select categoria.CategoryName;
+
+            if (listaNomesCateg.Count() <= 0)
+            {
+                if (nomeDaCategoria.Count() <= 0)
+                {
+                    return "Por favor verifique se preencheu todos os campos!";
+                }
+                else
+                {
+                    novaCategoria.CategoryName = nomeDaCategoria;
+                    nw.Categories.Add(novaCategoria);
+                    nw.SaveChanges();
+                    return "A categoria foi adicionada com o ID " + novaCategoria.CategoryID.ToString() + ".";
+                }
+            }
+            else
+            {
+                return msgErro;
+            }
+
+        }
+
+        public string AdicionarCliente(string clienteNew, string companyName)//METODO FUNCIONAL E COM "TRY-CATCH"
+        {
+            try
+            {
+                NORTHWNDEntities contexto = new NORTHWNDEntities();
+                Customer clienteAdicionarBD = new Customer();
+
+                var listaDeClientes = from cliente in contexto.Customers
+                                      select cliente.ContactName;
+
+                if (clienteNew.Count() <= 0 || companyName.Count() <= 0)
+                {
+                    return "Por favor verifique se preencheu todos os campos!";
+                }
+                if (listaDeClientes.Contains(clienteNew))
+                {
+                    return "Cliente já existente!";
+                }
+
+                #region RandomizacaoClienteID
+                string novoID = "";
+                string conjuntoCarateres = clienteNew.Replace(" ", "").ToUpper().Trim();
+                var random = new Random();
+                novoID = new string(
+                    Enumerable.Repeat(conjuntoCarateres, 5)
+                              .Select(s => s[random.Next(s.Length)])
+                              .ToArray());
+
+                var listaDeClienteID = from cliente in contexto.Customers
+                                       where cliente.CustomerID == novoID
+                                       select cliente.CustomerID;
+
+                while (listaDeClienteID.Contains(novoID))
+                {
+                    novoID = new string(
+                    Enumerable.Repeat(conjuntoCarateres, 5)
+                              .Select(s => s[random.Next(s.Length)])
+                              .ToArray());
+                }
+                #endregion
+
+                clienteAdicionarBD.ContactName = clienteNew;
+                clienteAdicionarBD.CustomerID = novoID;
+                clienteAdicionarBD.CompanyName = companyName;
+                contexto.Customers.Add(clienteAdicionarBD);
+                contexto.SaveChanges();
+
+                return "O cliente " + clienteNew + " foi adicionado à BD com o seguinte ID: " + novoID + ".";
+            }
+            catch (Exception)
+            {
+                return "Ocorreu um erro. Por favor verifique o código!";
+            }
+        }
+
+        public string AdicionarEncomenda(string shipName, string shipAddress, string shipCity)//METODO FUNCIONAL E COM "TRY-CATCH" FAZER A VERIFICAÇÃO DA EXISTENCIA NA BD
+        {
+            NORTHWNDEntities nw = new NORTHWNDEntities();
+            Order encomenda = new Order();
+
+            if (shipName.Count() <= 0 || shipAddress.Count() <= 0 || shipCity.Count() <= 0)
+            {
+                return "Por favor verifique se preencheu todos os campos.";
+            }
+            else
+            {
+                encomenda.ShipName = shipName;
+                encomenda.ShipAddress = shipAddress;
+                encomenda.ShipCity = shipCity;
+                nw.Orders.Add(encomenda);
+                nw.SaveChanges();
+
+                return "A encomenda que adicionou possui o ID " + encomenda.OrderID.ToString() + ".";
+            }
+        }
+        #endregion
+
+        #region Métodos de Update de Dados
+        public string AlterarProduto(string produtoNew, string produtoOld, int produtoID)//METODO FUNCIONAL COM "TRY-CATCH" A FALTAR UMA VERIFICAÇÃO PARA ID NÃO ENCONTRADO E DEMASIADOS CARATERES 
+        {
+            NORTHWNDEntities contexto = new NORTHWNDEntities();
+            var listaDeProdutos = from produto in contexto.Products
+                                  where produto.ProductName == produtoOld && produto.ProductID == produtoID
+                                  select produto;
+
+            foreach (var item in listaDeProdutos)
+            {
+                if (item.ProductName == produtoNew)
+                {
+                    return "Produto já existente!";
+                }
+                if (produtoNew.Count() <= 0 || produtoOld.Count() <= 0)
+                {
+                    return "Por favor verifique se preencheu todos os campos!";
+                }
+
+                else
+                {
+                    item.ProductName = produtoNew;
+                    contexto.SaveChanges();
+                }
+            }
+            return "O produto " + produtoOld + " foi substituido por " + produtoNew + ".";
+        }
+
+        public string AlterarCategoria(string categoriaNewName, string categoriaOldName, int categoriaID)//METODO FUNCIONAL COM "TRY-CATCH" A FALTAR UMA VERIFICAÇÃO PARA ID NÃO ENCONTRADO E DEMASIADOS CARATERES
+        {
+            NORTHWNDEntities contexto = new NORTHWNDEntities();
+
+            var listaDeCategorias = from categoria in contexto.Categories
+                                    where categoria.CategoryName == categoriaOldName && categoria.CategoryID == categoriaID
+                                    select categoria;
+
+            foreach (var item in listaDeCategorias)
+            {
+                if (item.CategoryName == categoriaNewName)
+                {
+                    return "Categoria já existente!";
+                }
+                if (categoriaNewName.Count() <= 0 || categoriaOldName.Count() <= 0)
+                {
+                    return "Por favor verifique se preencheu todos os dados!";
+                }
+                else
+                {
+                    item.CategoryName = categoriaNewName;
+                    contexto.SaveChanges();
+                }
+            }
+            return "A categoria " + categoriaOldName + " foi alterada na BD.";
+        }
+
+        public string AlterarCliente(string clienteNew, string clienteOld, string companyName, string clienteID)//METODO FUNCIONAL COM "TRY-CATCH" A FALTAR UMA VERIFICAÇÃO PARA ID NÃO ENCONTRADO E DEMASIADOS CARATERES
+        {
+            try
+            {
+                NORTHWNDEntities contexto = new NORTHWNDEntities();
+
+                var listaDeClientes = from cliente in contexto.Customers
+                                      where cliente.ContactName == clienteOld && cliente.CompanyName == companyName && cliente.CustomerID == clienteID
+                                      select cliente;
+
+                foreach (var item in listaDeClientes)
+                {
+                    if (item.ContactName == clienteNew)
+                    {
+                        return "O cliente que pretende alterar já se encontra na BD!";
+                    }
+                    if (clienteNew.Count() <= 0)
+                    {
+                        return "Por favor verifique se preencheu todos os dados!";
+                    }
+                    else
+                    {
+                        item.ContactName = clienteNew;
+                    }
+                }
+                contexto.SaveChanges();
+
+                return "O cliente " + clienteNew + " foi alterado na BD!";
+            }
+            catch (Exception)
+            {
+
+                return "Ocorreu um erro! Por favor verifique o código!";
+            }
+
+        }
+        #endregion
+
+        #region Métodos de Seleção de Dados Filtrados
+        public string TotalDeVendasOrders(int idDaEncomenda)//METODO FUNCIONAL
+        {
+            int resultado = 0;
+            NORTHWNDEntities nw = new NORTHWNDEntities();
+            var totalDeVendasEncomendas = from encomendas in nw.Order_Details
+                                          where encomendas.OrderID == idDaEncomenda
+                                          select encomendas.Quantity;
+
+            foreach (var item in totalDeVendasEncomendas)
+            {
+                resultado += item;
+            }
+
+            return "O número total de vendas por encomenda é de " + resultado.ToString() + ".";
+        }
+        public string TotalDeVendasCust(string cliente, string idDoCliente)//METODO FUNCIONAL
+        {
+            int resultado = 0;
+            NORTHWNDEntities nw = new NORTHWNDEntities();
+            var totalDeVendasEncomendas = from encomendas in nw.Order_Details
+                                          where encomendas.Order.Customer.ContactName == cliente && encomendas.Order.CustomerID == idDoCliente
+                                          select encomendas.Quantity;
+
+            foreach (var item in totalDeVendasEncomendas)
+            {
+                resultado += item;
+            }
+
+            return "O número total de vendas por cliente selecionado é " + resultado.ToString() + ".";
+        }
+        public string TotalDeVendasProd(int idDoProduto)//METODO FUNCIONAL
+        {
+            int resultado = 0;
+            NORTHWNDEntities nw = new NORTHWNDEntities();
+            var totalDeVendasPorProduto = from produto in nw.Order_Details
+                                          where produto.ProductID == idDoProduto
+                                          select produto.Quantity;
+            foreach (var item in totalDeVendasPorProduto)
+            {
+                resultado = item;
+            }
+            return "O número total de vendas por produto selecionado é de " + resultado.ToString() + ".";
+
+        }
+        public string TotalDeVendasCat(int idDaCategoria)//METODO FUNCIONAL
+        {
+            NORTHWNDEntities nw = new NORTHWNDEntities();
+            var totalDeVendasPorProduto = (from categoria in nw.Order_Details
+                                           where categoria.Product.CategoryID == idDaCategoria
+                                           select categoria.Quantity).First();
+
+            return "O número total de vendas por categoria selecionada é de " + totalDeVendasPorProduto.ToString() + ".";
+
+        }
+        #endregion
+    }
+}
